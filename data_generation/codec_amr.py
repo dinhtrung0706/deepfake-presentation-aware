@@ -2,22 +2,15 @@ import os
 import subprocess
 from tqdm import tqdm
 
-BASE_DIR = "data/base"
-OUT_DIR = "data/presented_amr"
-
-os.makedirs(f"{OUT_DIR}/bonafide", exist_ok=True)
-os.makedirs(f"{OUT_DIR}/spoof", exist_ok=True)
+SRC_ROOT = "data"
+DST_SUBDIR = "amr"
 
 
 def amr_simulate(in_wav, out_wav):
-    tmp_amr = "tmp.amr"
-
     subprocess.run(
         [
             "ffmpeg",
             "-y",
-            "-loglevel",
-            "error",
             "-i",
             in_wav,
             "-ac",
@@ -26,27 +19,34 @@ def amr_simulate(in_wav, out_wav):
             "8000",
             "-acodec",
             "libopencore_amrnb",
-            tmp_amr,
-        ]
+            "temp.amr",
+        ],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
     )
 
-    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", tmp_amr, out_wav])
+    subprocess.run(
+        ["ffmpeg", "-y", "-i", "temp.amr", out_wav],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
 
-    os.remove(tmp_amr)
+    os.remove("temp.amr")
 
 
-def process_split(label):
-    in_dir = os.path.join(BASE_DIR, label)
-    out_dir = os.path.join(OUT_DIR, label)
+def process_split(split):
+    for label in ["bonafide", "spoof"]:
+        src_dir = f"{SRC_ROOT}/{split}/base/{label}"
+        dst_dir = f"{SRC_ROOT}/{split}/amr/{label}"
+        os.makedirs(dst_dir, exist_ok=True)
 
-    files = [f for f in os.listdir(in_dir) if f.endswith(".wav")]
-
-    for f in tqdm(files, desc=f"AMR {label}"):
-        in_wav = os.path.join(in_dir, f)
-        out_wav = os.path.join(out_dir, f)
-        amr_simulate(in_wav, out_wav)
+        files = [f for f in os.listdir(src_dir) if f.endswith(".wav")]
+        for f in tqdm(files, desc=f"{split}-{label}"):
+            in_wav = os.path.join(src_dir, f)
+            out_wav = os.path.join(dst_dir, f)
+            amr_simulate(in_wav, out_wav)
 
 
 if __name__ == "__main__":
-    process_split("bonafide")
-    process_split("spoof")
+    process_split("train")
+    process_split("test")
