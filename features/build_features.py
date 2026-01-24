@@ -1,29 +1,33 @@
-import os
+from extract_logmel import build_dataset_w_dt
 import numpy as np
-from extract_logmel import build_dataset
+import os
 
-BASE_DIR = "data/train/base"
-AMR_DIR = "data/train/amr"
-OUT_DIR = "features_out"
+os.makedirs("features_out", exist_ok=True)
 
-os.makedirs(OUT_DIR, exist_ok=True)
+# ===== TRAIN =====
+X_bf, y_bf = build_dataset_w_dt("data/train/base/bonafide", 0)
+X_sp, y_sp = build_dataset_w_dt("data/train/base/spoof", 1)
+X_train_base = np.vstack([X_bf, X_sp])
+y_train = np.concatenate([y_bf, y_sp])
 
+X_bf, y_bf = build_dataset_w_dt("data/train/amr/bonafide", 0)
+X_sp, y_sp = build_dataset_w_dt("data/train/amr/spoof", 1)
+X_train_amr = np.vstack([X_bf, X_sp])
 
-def build_and_save(data_root, tag):
-    print(f"\nBuilding features for: {tag}")
+# ===== TEST =====
+X_bf, y_bf = build_dataset_w_dt("data/test/base/bonafide", 0)
+X_sp, y_sp = build_dataset_w_dt("data/test/base/spoof", 1)
+X_test_base = np.vstack([X_bf, X_sp])
+y_test = np.concatenate([y_bf, y_sp])
 
-    X_bona, y_bona = build_dataset(os.path.join(data_root, "bonafide"), label=0)
-    X_spoof, y_spoof = build_dataset(os.path.join(data_root, "spoof"), label=1)
+X_bf, y_bf = build_dataset_w_dt("data/test/amr/bonafide", 0)
+X_sp, y_sp = build_dataset_w_dt("data/test/amr/spoof", 1)
+X_test_amr = np.vstack([X_bf, X_sp])
 
-    X = np.vstack([X_bona, X_spoof])
-    y = np.concatenate([y_bona, y_spoof])
-
-    np.save(os.path.join(OUT_DIR, f"X_{tag}.npy"), X)
-    np.save(os.path.join(OUT_DIR, f"y_{tag}.npy"), y)
-
-    print(f"Saved {tag}: X shape {X.shape}, y shape {y.shape}")
-
-
-if __name__ == "__main__":
-    build_and_save(BASE_DIR, "base")
-    build_and_save(AMR_DIR, "amr")
+# ===== SAVE =====
+np.save("features_out/X_train_base.npy", X_train_base)
+np.save("features_out/X_train_amr.npy", X_train_amr)
+np.save("features_out/X_test_base.npy", X_test_base)
+np.save("features_out/X_test_amr.npy", X_test_amr)
+np.save("features_out/y_train.npy", y_train)
+np.save("features_out/y_test.npy", y_test)
