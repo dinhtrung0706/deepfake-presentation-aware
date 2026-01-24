@@ -160,8 +160,21 @@ The study highlights the need for **presentation-aware representations**, even w
 
 ## 11. References
 
-* ASVspoof Challenge baselines
-* On Deepfake Voice Detection – It’s All in the Presentation (arXiv:2509.26471)
+If you use this project or build upon it, please consider citing the following work which inspired the experimental design and analysis:
+
+```bibtex
+@misc{delgado2025deepfakevoicedetection,
+  title={On Deepfake Voice Detection -- It's All in the Presentation},
+  author={H{\'e}ctor Delgado and Giorgio Ramondetti and Emanuele Dalmasso and Gennady Karvitsky and Daniele Colibro and Haydar Talib},
+  year={2025},
+  eprint={2509.26471},
+  archivePrefix={arXiv},
+  primaryClass={eess.AS},
+  url={https://arxiv.org/abs/2509.26471}
+}
+```
+
+* ASVspoof 2019
 
 ---
 
