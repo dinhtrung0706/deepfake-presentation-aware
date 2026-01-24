@@ -5,10 +5,18 @@ from sklearn.pipeline import Pipeline
 import joblib
 
 # Load data
-X_train = np.load("features_out/X_train_base.npy")
-y_train = np.load("features_out/y_train.npy")
+X_base = np.load("features_out/X_train_base.npy")
+X_amr = np.load("features_out/X_train_amr.npy")
+y = np.load("features_out/y_train.npy")
 
-# Pipeline: scaling + LR
+# Combine
+X_train = np.vstack([X_base, X_amr])
+y_train = np.concatenate([y, y])
+
+print("Train shape:", X_train.shape)
+print("Label shape:", y_train.shape)
+
+# Pipeline
 clf = Pipeline(
     [
         ("scaler", StandardScaler()),
@@ -24,7 +32,7 @@ clf = Pipeline(
 # Train
 clf.fit(X_train, y_train)
 
-# Save model
-joblib.dump(clf, "training/lr_base_model.joblib")
+# Save
+joblib.dump(clf, "training/lr_base_amr_model.joblib")
 
-print("Training finished.")
+print("Training (Base + AMR) finished.")
