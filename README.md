@@ -68,19 +68,29 @@ This design follows **traditional ASVspoof baselines** and is fully CPU-compatib
 
 ---
 
-## 4. Model
+## 4. Models
 
-* **Classifier**: Logistic Regression
+### 4.1 Logistic Regression
+
 * **Pipeline**:
-
   * StandardScaler
   * LogisticRegression (liblinear, class-balanced)
 
 Rationale:
-
 * Linear model avoids overfitting
 * Ensures observed effects come from **features and presentation**, not model complexity
 * Common baseline in classical spoofing detection literature
+
+### 4.2 MLP (Multi-Layer Perceptron)
+
+* **Pipeline**:
+  * StandardScaler
+  * MLPClassifier (hidden layers, early stopping)
+
+Rationale:
+* Provides a non-linear baseline for comparison
+* Tests whether increased model capacity improves presentation robustness
+* Still CPU-friendly and interpretable
 
 ---
 
@@ -102,16 +112,32 @@ Performance is measured using **Equal Error Rate (EER)**.
 
 ## 6. Results
 
+### 6.1 Logistic Regression
+
 | Training Data | Test Base | Test AMR |
 | ------------- | --------- | -------- |
 | Base          | 23.00%    | 28.60%   |
 | Base + AMR    | 23.20%    | 27.10%   |
 
+### 6.2 MLP (Multi-Layer Perceptron)
+
+| Training Data | Test Base | Test AMR |
+| ------------- | --------- | -------- |
+| Base          | 22.00%    | 29.70%   |
+| Base + AMR    | 24.00%    | 22.90%   |
+
 ### Observations
 
+**Logistic Regression:**
 * AMR encoding causes a **large performance degradation** (~+5.6% EER)
-* Adding AMR data during training **partially mitigates** this degradation
+* Adding AMR data during training **partially mitigates** this degradation (28.60% → 27.10%)
 * A significant performance gap remains, indicating limited presentation robustness
+
+**MLP:**
+* MLP achieves slightly better baseline performance on Base (22.00% vs 23.00%)
+* However, AMR mismatch causes **even larger degradation** for MLP (~+7.7% EER)
+* Presentation-aware training with MLP shows **stronger improvement** on AMR (29.70% → 22.90%)
+* MLP benefits more from presentation-aware training due to its higher model capacity
 
 ---
 
@@ -120,10 +146,12 @@ Performance is measured using **Equal Error Rate (EER)**.
 The results show that:
 
 * Dynamic log-mel features are **sensitive to codec-induced presentation mismatch**
-* Presentation-aware training improves robustness, but only marginally
-* Handcrafted spectral features lack sufficient capacity to fully encode codec artifacts
+* Both Logistic Regression and MLP suffer significant degradation under AMR mismatch
+* **MLP with presentation-aware training** achieves the best AMR performance (22.90%), demonstrating that increased model capacity can better leverage diverse training data
+* However, MLP's Base performance slightly degrades with mixed training (22.00% → 24.00%), suggesting a trade-off between matched and mismatched conditions
+* Logistic Regression shows more stable but limited improvements across conditions
 
-This aligns with findings in recent literature: **presentation robustness is primarily a representation problem, not a classifier problem**.
+This aligns with findings in recent literature: **presentation robustness benefits from both diverse training data and sufficient model capacity**.
 
 ---
 
@@ -139,13 +167,14 @@ These limitations are intentional to keep the system interpretable and CPU-frien
 
 ## 9. Conclusion
 
-This project demonstrates, using a simple and transparent pipeline, that:
+This project demonstrates, using simple and transparent pipelines, that:
 
-* Presentation mismatch (AMR encoding) significantly degrades spoofing detection
-* Presentation-aware training provides limited but consistent gains
-* Traditional log-mel based features are insufficient for full robustness
+* Presentation mismatch (AMR encoding) significantly degrades spoofing detection for both linear and non-linear models
+* Presentation-aware training provides gains, with **MLP showing stronger improvement** on mismatched conditions (29.70% → 22.90% on AMR)
+* Linear models (Logistic Regression) provide more stable but limited improvements
+* Traditional log-mel based features benefit from increased model capacity when combined with presentation-aware training
 
-The study highlights the need for **presentation-aware representations**, even when using simple classifiers.
+The study highlights the importance of both **presentation-aware training data** and **sufficient model capacity** for robust spoofing detection.
 
 ---
 
