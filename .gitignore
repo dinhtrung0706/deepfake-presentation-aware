@@ -1,2 +1,8 @@
+# folders and files to ignore
 .DS_Store
 .venv
+__pycache__/
+
+# data files
+*.npy
+*.amr
