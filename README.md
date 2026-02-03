@@ -112,32 +112,42 @@ Performance is measured using **Equal Error Rate (EER)**.
 
 ## 6. Results
 
+Performance is measured using:
+- **EER (Equal Error Rate)**: Error rate at balanced threshold (FPR = FNR)
+- **MDR @ FAR=1%**: Missed Detection Rate when allowing only 1% false acceptance (high security setting)
+
 ### 6.1 Logistic Regression
 
-| Training Data | Test Base | Test AMR |
-| ------------- | --------- | -------- |
-| Base          | 23.00%    | 28.60%   |
-| Base + AMR    | 23.20%    | 27.10%   |
+| Training Data | Test Base (EER) | Test AMR (EER) | Test Base (MDR@1%) | Test AMR (MDR@1%) |
+| ------------- | --------------- | -------------- | ------------------ | ----------------- |
+| Base          | 23.00%          | 28.60%         | 65.60%             | 79.40%            |
+| Base + AMR    | 23.20%          | 27.10%         | 74.40%             | 81.40%            |
 
 ### 6.2 MLP (Multi-Layer Perceptron)
 
-| Training Data | Test Base | Test AMR |
-| ------------- | --------- | -------- |
-| Base          | 22.00%    | 29.70%   |
-| Base + AMR    | 24.00%    | 22.90%   |
+| Training Data | Test Base (EER) | Test AMR (EER) | Test Base (MDR@1%) | Test AMR (MDR@1%) |
+| ------------- | --------------- | -------------- | ------------------ | ----------------- |
+| Base          | 22.00%          | 29.70%         | 91.00%             | 95.40%            |
+| Base + AMR    | 24.00%          | 22.90%         | 66.80%             | 61.00%            |
 
 ### Observations
 
-**Logistic Regression:**
+**Logistic Regression (EER):**
 * AMR encoding causes a **large performance degradation** (~+5.6% EER)
 * Adding AMR data during training **partially mitigates** this degradation (28.60% → 27.10%)
 * A significant performance gap remains, indicating limited presentation robustness
 
-**MLP:**
+**MLP (EER):**
 * MLP achieves slightly better baseline performance on Base (22.00% vs 23.00%)
 * However, AMR mismatch causes **even larger degradation** for MLP (~+7.7% EER)
 * Presentation-aware training with MLP shows **stronger improvement** on AMR (29.70% → 22.90%)
 * MLP benefits more from presentation-aware training due to its higher model capacity
+
+**MDR at FAR=1%:**
+* At strict security settings (FAR=1%), both models miss a significant portion of attacks
+* MLP trained on Base only shows **extremely high MDR** (91-95%), indicating poor generalization at low FAR
+* **Presentation-aware training dramatically improves MLP's MDR** (95.40% → 61.00% on AMR)
+* Logistic Regression shows more stable but still high MDR, with less benefit from presentation-aware training
 
 ---
 
@@ -147,11 +157,19 @@ The results show that:
 
 * Dynamic log-mel features are **sensitive to codec-induced presentation mismatch**
 * Both Logistic Regression and MLP suffer significant degradation under AMR mismatch
-* **MLP with presentation-aware training** achieves the best AMR performance (22.90%), demonstrating that increased model capacity can better leverage diverse training data
+* **MLP with presentation-aware training** achieves the best AMR performance (22.90% EER), demonstrating that increased model capacity can better leverage diverse training data
 * However, MLP's Base performance slightly degrades with mixed training (22.00% → 24.00%), suggesting a trade-off between matched and mismatched conditions
 * Logistic Regression shows more stable but limited improvements across conditions
 
-This aligns with findings in recent literature: **presentation robustness benefits from both diverse training data and sufficient model capacity**.
+**High-Security Scenario (FAR=1%):**
+
+* At strict security thresholds, the impact of presentation mismatch becomes **even more severe**
+* MLP trained only on Base misses **91-95% of attacks** when tested under presentation mismatch
+* Presentation-aware training provides **dramatic improvement** for MLP (95.40% → 61.00% MDR on AMR)
+* Logistic Regression maintains more consistent but still high MDR across conditions
+* The gap between EER and MDR@1% highlights that **real-world security deployments face much higher miss rates** than balanced metrics suggest
+
+This aligns with findings in recent literature: **presentation robustness benefits from both diverse training data and sufficient model capacity**, especially under strict security requirements.
 
 ---
 
@@ -170,11 +188,12 @@ These limitations are intentional to keep the system interpretable and CPU-frien
 This project demonstrates, using simple and transparent pipelines, that:
 
 * Presentation mismatch (AMR encoding) significantly degrades spoofing detection for both linear and non-linear models
-* Presentation-aware training provides gains, with **MLP showing stronger improvement** on mismatched conditions (29.70% → 22.90% on AMR)
-* Linear models (Logistic Regression) provide more stable but limited improvements
+* Presentation-aware training provides gains, with **MLP showing stronger improvement** on mismatched conditions (EER: 29.70% → 22.90%, MDR@1%: 95.40% → 61.00%)
+* At high-security thresholds (FAR=1%), the impact is **much more severe** — models miss 61-95% of attacks
+* Linear models (Logistic Regression) provide more stable but limited improvements across all metrics
 * Traditional log-mel based features benefit from increased model capacity when combined with presentation-aware training
 
-The study highlights the importance of both **presentation-aware training data** and **sufficient model capacity** for robust spoofing detection.
+The study highlights the importance of both **presentation-aware training data** and **sufficient model capacity** for robust spoofing detection, particularly in **high-security deployments** where FAR must be minimized.
 
 ---
 
