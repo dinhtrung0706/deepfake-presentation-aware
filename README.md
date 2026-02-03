@@ -10,11 +10,14 @@ The goal is **not** to build a state-of-the-art model, but to **demonstrate, in 
 
 Spoofing / deepfake detectors often assume that training and testing data share the same *presentation conditions*. In practice, speech may undergo additional transformations (e.g., telephony codecs such as **AMR-NB**), causing **presentation mismatch**.
 
+In high-security deployments, systems must operate at **low False Acceptance Rate (FAR)**, such as 1%, to minimize the risk of accepting spoofed audio. This makes **Missed Detection Rate (MDR) at FAR=1%** a critical metric alongside the commonly reported EER.
+
 This project investigates:
 
-* How much AMR encoding degrades spoofing detection performance
+* How much AMR encoding degrades spoofing detection performance (EER)
+* The severity of degradation under high-security thresholds (MDR @ FAR=1%)
 * Whether adding AMR data during training improves robustness
-* The limits of **traditional handcrafted features + linear models** under such mismatch
+* The limits of **traditional handcrafted features + linear/non-linear models** under such mismatch
 
 ---
 
